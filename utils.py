@@ -6,7 +6,7 @@ import pandas as pd
 def load_data():
     """Loads the CSV data into a pandas DataFrame."""
     try:
-        df = pd.read_csv("imputed_data.csv")
+        df = pd.read_csv("fss.csv")
         return df
     except FileNotFoundError:
         st.error("Error: 'gpt_analyze.csv' not found. Please ensure the file is in the correct directory.")
