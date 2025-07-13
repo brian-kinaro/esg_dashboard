@@ -8,3 +8,4 @@ plotly
 qrcode
 xgboost
 shap
+fpdf
