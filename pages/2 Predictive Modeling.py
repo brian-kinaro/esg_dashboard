@@ -162,7 +162,7 @@ if st.button("🔍 Run ESG Forecast"):
 
     # Forecast
     prediction = model.predict(X_input_imputed)[0]
-    st.success(f"📈 Forecasted ESG Performance (FSS): **{prediction:.2f}**")
+    st.success(f"📈 Forecasted ESG Performance (FSS): **{prediction * 100:.2f}%**")
 
     # Feature importances (from adjusted input)
     importances = model.feature_importances_
