@@ -14,12 +14,11 @@ st.markdown(
     /* General Styles */
     body {
         color: #e0e0e0;
-        background-color: #0c1a2e; /* Dark blue background */
+        background-color: #0c1a2e;
     }
 
-    /* Headings */
     h1, h2, h3, h4, h5, h6 {
-        color: #197ffc; 
+        color: #197ffc;
         font-weight: 700;
         text-shadow: 0 0 8px rgba(0, 234, 255, 0.4);
         margin-top: 1.5em;
@@ -29,9 +28,8 @@ st.markdown(
     h2 { font-size: 2.2rem; }
     h3 { font-size: 1.8rem; }
 
-    /* Streamlit components specific styling */
     .stButton>button {
-        background-color: #1a5e8a; /* Darker blue for buttons */
+        background-color: #1a5e8a;
         color: #ffffff;
         border-radius: 8px;
         border: 1px solid #3282b8;
@@ -41,14 +39,14 @@ st.markdown(
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
     .stButton>button:hover {
-        background-color: #3282b8; /* Lighter blue on hover */
+        background-color: #3282b8;
         color: #ffffff;
         transform: translateY(-2px);
         box-shadow: 0 6px 12px rgba(0, 234, 255, 0.4);
     }
 
     .stRadio > label > div {
-        color: #aaddff; /* Lighter blue for radio options */
+        color: #aaddff;
         font-weight: 500;
     }
 
@@ -64,7 +62,6 @@ st.markdown(
         color: #c0c0c0;
     }
 
-    /* Info, Success, Warning, Error messages */
     .stInfo {
         background-color: rgba(0, 150, 200, 0.15);
         border-left: 5px solid #00eaff;
@@ -94,7 +91,6 @@ st.markdown(
         color: #ff9999;
     }
 
-    /* Custom classes for animations */
     .fade-in {
         animation: fadeIn 1.5s ease forwards;
         opacity: 0;
@@ -112,7 +108,6 @@ st.markdown(
         font-style: italic;
     }
 
-    /* Plotly chart container styling */
     .stPlotlyChart {
         border-radius: 10px;
         overflow: hidden;
@@ -128,7 +123,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
 
 st.title("🔮 Dynamic ESG Prediction")
 st.write("Predict ESG performance (FSS) and understand which inputs most influence the prediction.")
@@ -153,35 +147,37 @@ for col in feature_cols:
 
 X_input = pd.DataFrame([user_input])
 
-# Train XGBoost model
-X = df[feature_cols]
-y = df[target_col]
+# Button to trigger forecast
+if st.button("🔍 Run ESG Forecast"):
+    # Train XGBoost model
+    X = df[feature_cols]
+    y = df[target_col]
 
-imputer = SimpleImputer(strategy="median")
-X_imputed = imputer.fit_transform(X)
-X_input_imputed = imputer.transform(X_input)
+    imputer = SimpleImputer(strategy="median")
+    X_imputed = imputer.fit_transform(X)
+    X_input_imputed = imputer.transform(X_input)
 
-model = XGBRegressor(n_estimators=300, learning_rate=0.05, random_state=42)
-model.fit(X_imputed, y)
+    model = XGBRegressor(n_estimators=300, learning_rate=0.05, random_state=42)
+    model.fit(X_imputed, y)
 
-# Forecast
-prediction = model.predict(X_input_imputed)[0]
-st.success(f"📈 Forecasted ESG Performance (FSS): **{prediction:.2f}**")
+    # Forecast
+    prediction = model.predict(X_input_imputed)[0]
+    st.success(f"📈 Forecasted ESG Performance (FSS): **{prediction:.2f}**")
 
-# Feature importances (from adjusted input)
-importances = model.feature_importances_
-importance_df = pd.DataFrame({
-    "Indicator": feature_cols,
-    "Importance": importances
-}).sort_values("Importance", ascending=False)
+    # Feature importances (from adjusted input)
+    importances = model.feature_importances_
+    importance_df = pd.DataFrame({
+        "Indicator": feature_cols,
+        "Importance": importances
+    }).sort_values("Importance", ascending=False)
 
-# Plot
-st.subheader("🧮 Feature Contribution (Forecasted ESG Performance)")
-fig = px.bar(importance_df.head(15), x="Importance", y="Indicator", orientation="h",
-             color="Importance", color_continuous_scale="Blues_r",
-             title="Top ESG Indicators Contributing to Forecast (XGBoost Feature Importance)")
+    # Plot
+    st.subheader("🧮 Feature Contribution (Forecasted ESG Performance)")
+    fig = px.bar(importance_df.head(15), x="Importance", y="Indicator", orientation="h",
+                 color="Importance", color_continuous_scale="Blues_r",
+                 title="Top ESG Indicators Contributing to Forecast (XGBoost Feature Importance)")
 
-fig.update_layout(yaxis=dict(title=""), xaxis=dict(title="Relative Importance"), height=600)
-st.plotly_chart(fig, use_container_width=True)
+    fig.update_layout(yaxis=dict(title=""), xaxis=dict(title="Relative Importance"), height=600)
+    st.plotly_chart(fig, use_container_width=True)
 
-st.caption("Note: This shows overall feature importance from XGBoost")
+    st.caption("Note: This shows overall feature importance from XGBoost")
