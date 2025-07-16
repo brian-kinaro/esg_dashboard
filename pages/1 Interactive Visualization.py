@@ -150,7 +150,7 @@ st.markdown(
 st.markdown(
     """
     <div class="fade-in">
-        <h1><img src="https://em-content.zobj.net/source/microsoft-teams/337/globe-showing-africa-europe_1f30d.png" style="height:45px; vertical-align:middle;"> Africa ESG Dashboard</h1>
+        <h1> 🌍 ESG Visualization </h1>
         <p class="subtitle">Exploring Environmental, Social, and Governance Insights Across African Nations</p>
     </div>
     """,
