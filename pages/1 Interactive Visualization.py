@@ -150,7 +150,7 @@ st.markdown(
 st.markdown(
     """
     <div class="fade-in">
-        <h1> 🌍 ESG Visualization </h1>
+        <h1> 🌍 ESG Visualizations </h1>
         <p class="subtitle">Exploring Environmental, Social, and Governance Insights Across African Nations</p>
     </div>
     """,
