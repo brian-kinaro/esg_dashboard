@@ -8,14 +8,3 @@ scikit-learn
 xgboost
 pyyaml
 requests
-nltk
-gensim
-openpyxl
-pyarrow
-altair
-bokeh
-holoviews
-hvplot
-shap
-python-dateutil
-pytz
