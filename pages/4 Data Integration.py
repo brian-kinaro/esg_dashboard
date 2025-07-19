@@ -363,7 +363,7 @@ if df is not None and not df.empty:
                     mdl.fit(X_train, y_train)
                     preds = mdl.predict(X_test)
 
-                    rmse = mean_squared_error(y_test, preds, squared=False)
+                    rmse = np.sqrt(mean_squared_error(y_test, preds))
                     mae = mean_absolute_error(y_test, preds)
                     r2 = r2_score(y_test, preds)
                     
