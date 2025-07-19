@@ -8,3 +8,7 @@ scikit-learn
 xgboost
 pyyaml
 requests
+fpdf
+shap
+openpyxl
+pyarrow
