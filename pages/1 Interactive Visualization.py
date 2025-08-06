@@ -399,60 +399,73 @@ with corr_tab:
                                xaxis_tickangle=-45) # Angle x-axis labels
         st.plotly_chart(fig_corr, use_container_width=True)
         
-        # --- Automatic highlights: top positive & negative correlations ---
+        # --- Automatic correlation insights with plain-language explanation ---
         try:
-            # Ensure corr_df is numeric and has matching shape
-            if corr_df.empty:
-                st.info("Correlation matrix is empty — no highlights to show.")
-            else:
-                # Keep only upper triangle to avoid duplicate pairs and self-correlations
+            if not corr_df.empty:
+                # Keep only upper triangle to avoid duplicates
                 mask = np.triu(np.ones(corr_df.shape), k=1).astype(bool)
                 corr_upper = corr_df.where(mask)
         
-                # Stack and reset index to get pairwise rows
+                # Convert to pair list
                 corr_pairs = corr_upper.stack().reset_index()
                 corr_pairs.columns = ["Variable A", "Variable B", "Correlation"]
         
-                if corr_pairs.empty:
-                    st.info("No pairwise correlations found (matrix may be degenerate).")
-                else:
-                    # Sort to get top positive and top negative correlations
+                if not corr_pairs.empty:
+                    # Sort for top positive and negative correlations
                     top_pos = corr_pairs.sort_values("Correlation", ascending=False).head(5).copy()
                     top_neg = corr_pairs.sort_values("Correlation", ascending=True).head(5).copy()
         
-                    # Round correlation values for display
-                    top_pos["Correlation"] = top_pos["Correlation"].round(3)
-                    top_neg["Correlation"] = top_neg["Correlation"].round(3)
+                    # Round for readability
+                    top_pos["Correlation"] = top_pos["Correlation"].round(2)
+                    top_neg["Correlation"] = top_neg["Correlation"].round(2)
         
-                    # Display side-by-side
-                    st.markdown("### 🔝 Top correlations highlights")
+                    # Display the tables
+                    st.markdown("### 🔝 Top correlation highlights")
                     col_pos, col_neg = st.columns(2)
                     with col_pos:
-                        st.subheader("Top 5 Positive Correlations")
+                        st.subheader("Top 5 Positive")
                         st.dataframe(top_pos.reset_index(drop=True), use_container_width=True)
                     with col_neg:
-                        st.subheader("Top 5 Negative Correlations")
+                        st.subheader("Top 5 Negative")
                         st.dataframe(top_neg.reset_index(drop=True), use_container_width=True)
         
-                    # Expandable interpretation section (automatically references the table values)
-                    with st.expander(f"🔍 Interpretations & Key Observations for {sel_year}", expanded=False):
-                        st.markdown(
-                            f"**Summary for {sel_year}:** The table above lists the 5 strongest positive and negative pairwise linear correlations "
-                            "between the selected ESG indicators across countries. Positive values indicate variables that increase together; "
-                            "negative values indicate variables that move in opposite directions."
-                        )
+                    # Plain-language explanation block
+                    st.markdown(f"""
+                    ### 📊 Correlation Insights for {sel_year}
+                    This is a correlation matrix of ESG (Environmental, Social, and Governance) indicators for **{sel_year}**, visualized above as a heatmap.
         
-                        st.write("**Top Positive Correlations (interpretation):**")
-                        for _, row in top_pos.iterrows():
-                            st.write(f"- **{row['Variable A']} ↔ {row['Variable B']}**: {row['Correlation']} — variables that tend to move together.")
+                    🔍 **Key Observations:**
         
-                        st.write("**Top Negative Correlations (interpretation):**")
-                        for _, row in top_neg.iterrows():
-                            st.write(f"- **{row['Variable A']} ↔ {row['Variable B']}**: {row['Correlation']} — variables that tend to move in opposite directions.")
+                    ✅ **Strong Positive Correlations** (Dark Red) — these indicate variables that tend to move together.
+                    """)
+                    for _, row in top_pos.iterrows():
+                        st.write(f"- **{row['Variable A']}** & **{row['Variable B']}**: ~{row['Correlation']} — when one increases, the other usually increases too.")
         
+                    st.markdown("""
+                    🚫 **Strong Negative Correlations** (Dark Blue) — these indicate variables that tend to move in opposite directions.
+                    """)
+                    for _, row in top_neg.iterrows():
+                        st.write(f"- **{row['Variable A']}** & **{row['Variable B']}**: ~{row['Correlation']} — when one increases, the other usually decreases.")
+        
+                    st.markdown("""
+                    ⚖️ **Low or No Correlation** (White) — these indicate no strong linear relationship between the variables. They may be unrelated or influenced by other factors.
+        
+                    **Interpretation by Theme:**
+                    - **Environmental:** Look for how natural resources and emissions relate. Negative values often mean better sustainability.
+                    - **Social:** Education and health indicators often rise together; poor health metrics usually link with lower education.
+                    - **Governance:** Governance quality indicators (corruption control, regulatory quality, rule of law) often strongly reinforce each other and link with composite ESG scores.
+        
+                    *Note:* Correlation does not imply causation — these are patterns in the data, not proof of one variable causing another.
+                    """)
+        
+                else:
+                    st.info("No correlation pairs to display.")
+            else:
+                st.info("Correlation matrix is empty — no insights generated.")
         
         except Exception as e:
-            st.warning(f"Could not compute automatic correlation highlights: {e}")
+            st.warning(f"Could not generate correlation insights: {e}")
+
 
 
     st.markdown("---")
