@@ -400,21 +400,7 @@ with corr_tab:
         st.plotly_chart(fig_corr, use_container_width=True)
     else:
         st.info(f"No data available for correlation matrix in {sel_year}.")
-    st.write(" 
-    🔍 Key Observations
-    ✅ Strong Positive Correlations (Dark Red)
-    These indicate variables that move together.
-        Control of Corruption & Rule of Law: ~0.93
-        Suggests that countries with less corruption tend to have stronger legal systems.
-        Government Effectiveness & Regulatory Quality: ~0.91
-        Well-governed countries also tend to implement quality regulations.
-        Voice and Accountability & Rule of Law: ~0.88
-        Strong democratic participation is associated with legal enforcement.
-        Life Expectancy & School Enrollment: ~0.84
-        Better education is linked with improved life expectancy.
-        FSS (likely a composite ESG index) & Rule of Law/Gov. Effectiveness: >0.85
-        Suggests institutional strength heavily influences ESG scores.
-             ")
+
     st.markdown("---")
     st.subheader("📈 Average Trendlines for Selected Indicators")
     st.write("Observe how the average scores for specific ESG indicators have evolved over time across all African countries.")
