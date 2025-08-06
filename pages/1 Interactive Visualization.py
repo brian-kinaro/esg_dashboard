@@ -399,81 +399,65 @@ with corr_tab:
                                xaxis_tickangle=-45) # Angle x-axis labels
         st.plotly_chart(fig_corr, use_container_width=True)
         
-        # --- Interpretive commentary below the correlation matrix ---
-        with st.expander(f"🔍 Interpretations & Key Observations for {sel_year}", expanded=True):
-            # Show the user's supplied commentary (tied to 2023 in their text)
-            st.markdown(
-                f"""
-                **This is a correlation matrix of ESG (Environmental, Social, and Governance) indicators for {sel_year}, visualized as a heatmap.**
-    
-                🔍 **Key Observations:**
-                ✅ **Strong Positive Correlations (Dark Red)**  
-                These indicate variables that move together.
-                - **Control of Corruption & Rule of Law:** ~0.93  
-                - **Government Effectiveness & Regulatory Quality:** ~0.91  
-                - **Voice and Accountability & Rule of Law:** ~0.88  
-                - **Life Expectancy & School Enrollment:** ~0.84  
-                - **FSS (composite ESG) & Rule of Law / Gov. Effectiveness:** >0.85
-    
-                🚫 **Strong Negative Correlations (Dark Blue)**  
-                These indicate variables that move in opposite directions.
-                - **CO₂ Emissions & Forest Area:** ~−0.71  
-                - **Fertility Rate & Life Expectancy:** ~−0.74  
-                - **Mortality Rate (under 5) & Life Expectancy:** ~−0.88  
-                - **CO₂ Emissions & Renewable Energy:** ~−0.58
-    
-                ⚖️ **Low or No Correlation (Near 0, White)**  
-                These indicate no linear relationship.
-                - **Forest area & Rule of Law:** ~0.13  
-                - **Fertility Rate & Regulatory Quality:** ~−0.01  
-                - **Heating Degree Days & CO₂:** ~0.08
-    
-                **📊 Interpretation by Theme**
-                - **Environmental:** Forest area and renewables are negatively correlated with CO₂ emissions, consistent with climate policy effects.  
-                - **Social:** Education (e.g., school enrollment) and health (life expectancy) show strong positive associations.  
-                - **Governance:** Corruption control, regulatory quality, rule of law, and voice/accountability are highly interrelated and closely tied to overall ESG (FSS).
-    
-                *Note: the numeric values above are indicative. Use the table below to display the exact correlation values from the selected year ({sel_year}).*
-                """,
-                unsafe_allow_html=False,
-            )
-    
-            # Optional: show exact correlation values for the named pairs (falls back to NaN if not found)
-            try:
-                def get_corr(a, b):
-                    return corr_df.loc[a, b] if (a in corr_df.index and b in corr_df.columns) else np.nan
-                    
-                st.write("Columns in correlation matrix:", corr_df.columns.tolist())
+        # --- Automatic highlights: top positive & negative correlations ---
+        try:
+            # Ensure corr_df is numeric and has matching shape
+            if corr_df.empty:
+                st.info("Correlation matrix is empty — no highlights to show.")
+            else:
+                # Keep only upper triangle to avoid duplicate pairs and self-correlations
+                mask = np.triu(np.ones(corr_df.shape), k=1).astype(bool)
+                corr_upper = corr_df.where(mask)
+        
+                # Stack and reset index to get pairwise rows
+                corr_pairs = corr_upper.stack().reset_index()
+                corr_pairs.columns = ["Variable A", "Variable B", "Correlation"]
+        
+                if corr_pairs.empty:
+                    st.info("No pairwise correlations found (matrix may be degenerate).")
+                else:
+                    # Sort to get top positive and top negative correlations
+                    top_pos = corr_pairs.sort_values("Correlation", ascending=False).head(5).copy()
+                    top_neg = corr_pairs.sort_values("Correlation", ascending=True).head(5).copy()
+        
+                    # Round correlation values for display
+                    top_pos["Correlation"] = top_pos["Correlation"].round(3)
+                    top_neg["Correlation"] = top_neg["Correlation"].round(3)
+        
+                    # Display side-by-side
+                    st.markdown("### 🔝 Top correlations highlights")
+                    col_pos, col_neg = st.columns(2)
+                    with col_pos:
+                        st.subheader("Top 5 Positive Correlations")
+                        st.dataframe(top_pos.reset_index(drop=True), use_container_width=True)
+                    with col_neg:
+                        st.subheader("Top 5 Negative Correlations")
+                        st.dataframe(top_neg.reset_index(drop=True), use_container_width=True)
+        
+                    # Expandable interpretation section (automatically references the table values)
+                    with st.expander(f"🔍 Interpretations & Key Observations for {sel_year}", expanded=False):
+                        st.markdown(
+                            f"**Summary for {sel_year}:** The table above lists the 5 strongest positive and negative pairwise linear correlations "
+                            "between the selected ESG indicators across countries. Positive values indicate variables that increase together; "
+                            "negative values indicate variables that move in opposite directions."
+                        )
+        
+                        st.write("**Top Positive Correlations (interpretation):**")
+                        for _, row in top_pos.iterrows():
+                            st.write(f"- **{row['Variable A']} ↔ {row['Variable B']}**: {row['Correlation']} — variables that tend to move together.")
+        
+                        st.write("**Top Negative Correlations (interpretation):**")
+                        for _, row in top_neg.iterrows():
+                            st.write(f"- **{row['Variable A']} ↔ {row['Variable B']}**: {row['Correlation']} — variables that tend to move in opposite directions.")
+        
+                        st.markdown(
+                            "⚠️ *Note:* Correlation is linear and does not imply causation. Consider investigating outliers, sample sizes, "
+                            "or using domain knowledge before drawing strong conclusions."
+                        )
+        
+        except Exception as e:
+            st.warning(f"Could not compute automatic correlation highlights: {e}")
 
-                sample_pairs = [
-                    ("Control_of_Corruption", "Rule_of_Law"),
-                    ("Government_Effectiveness", "Regulatory_Quality"),
-                    ("Voice_and_Accountability", "Rule_of_Law"),
-                    ("Life_expectancy", "School_enrollment"),
-                    ("FSS", "Rule_of_Law"),
-                    ("CO2_emissions", "Forest_area"),
-                    ("Fertility_rate", "Life_expectancy"),
-                    ("Under5_mortality_rate", "Life_expectancy"),
-                    ("CO2_emissions", "Renewable_energy")
-                ]
-    
-                # Build a small DataFrame of these values if the labels exist in the correlation matrix
-                rows = []
-                for a, b in sample_pairs:
-                    val = get_corr(a, b)
-                    if not pd.isna(val):
-                        rows.append({"Pair": f"{a} ↔ {b}", "Correlation": float(val)})
-                    else:
-                        rows.append({"Pair": f"{a} ↔ {b}", "Correlation": "N/A (label not found)"})
-    
-                sample_df = pd.DataFrame(rows)
-                st.subheader("Exact correlations (from data)")
-                st.dataframe(sample_df, use_container_width=True)
-            except Exception as e:
-                st.warning(f"Could not extract sample correlations: {e}")
-            
-    else:
-        st.info(f"No data available for correlation matrix in {sel_year}.")
 
     st.markdown("---")
     st.subheader("📈 Average Trendlines for Selected Indicators")
