@@ -442,17 +442,19 @@ with corr_tab:
             try:
                 def get_corr(a, b):
                     return corr_df.loc[a, b] if (a in corr_df.index and b in corr_df.columns) else np.nan
-    
+                    
+                st.write("Columns in correlation matrix:", corr_df.columns.tolist())
+
                 sample_pairs = [
-                    ("Control of Corruption", "Rule of Law"),
-                    ("Government Effectiveness", "Regulatory Quality"),
-                    ("Voice and Accountability", "Rule of Law"),
-                    ("Life Expectancy", "School Enrollment"),
-                    ("FSS", "Rule of Law"),
-                    ("CO2 Emissions", "Forest Area"),
-                    ("Fertility Rate", "Life Expectancy"),
-                    ("Mortality Rate (under 5)", "Life Expectancy"),
-                    ("CO2 Emissions", "Renewable Energy")
+                    ("Control_of_Corruption", "Rule_of_Law"),
+                    ("Government_Effectiveness", "Regulatory_Quality"),
+                    ("Voice_and_Accountability", "Rule_of_Law"),
+                    ("Life_expectancy", "School_enrollment"),
+                    ("FSS", "Rule_of_Law"),
+                    ("CO2_emissions", "Forest_area"),
+                    ("Fertility_rate", "Life_expectancy"),
+                    ("Under5_mortality_rate", "Life_expectancy"),
+                    ("CO2_emissions", "Renewable_energy")
                 ]
     
                 # Build a small DataFrame of these values if the labels exist in the correlation matrix
