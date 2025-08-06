@@ -450,10 +450,6 @@ with corr_tab:
                         for _, row in top_neg.iterrows():
                             st.write(f"- **{row['Variable A']} ↔ {row['Variable B']}**: {row['Correlation']} — variables that tend to move in opposite directions.")
         
-                        st.markdown(
-                            "⚠️ *Note:* Correlation is linear and does not imply causation. Consider investigating outliers, sample sizes, "
-                            "or using domain knowledge before drawing strong conclusions."
-                        )
         
         except Exception as e:
             st.warning(f"Could not compute automatic correlation highlights: {e}")
