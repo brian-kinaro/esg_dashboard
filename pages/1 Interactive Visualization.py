@@ -398,6 +398,78 @@ with corr_tab:
                                xaxis_showgrid=False, yaxis_showgrid=False, # Hide gridlines for cleaner look
                                xaxis_tickangle=-45) # Angle x-axis labels
         st.plotly_chart(fig_corr, use_container_width=True)
+        
+    # --- Interpretive commentary below the correlation matrix ---
+    with st.expander(f"🔍 Interpretations & Key Observations for {sel_year}", expanded=True):
+        # Show the user's supplied commentary (tied to 2023 in their text)
+        st.markdown(
+            f"""
+            **This is a correlation matrix of ESG (Environmental, Social, and Governance) indicators for {sel_year}, visualized as a heatmap.**
+
+            🔍 **Key Observations:**
+            ✅ **Strong Positive Correlations (Dark Red)**  
+            These indicate variables that move together.
+            - **Control of Corruption & Rule of Law:** ~0.93  
+            - **Government Effectiveness & Regulatory Quality:** ~0.91  
+            - **Voice and Accountability & Rule of Law:** ~0.88  
+            - **Life Expectancy & School Enrollment:** ~0.84  
+            - **FSS (composite ESG) & Rule of Law / Gov. Effectiveness:** >0.85
+
+            🚫 **Strong Negative Correlations (Dark Blue)**  
+            These indicate variables that move in opposite directions.
+            - **CO₂ Emissions & Forest Area:** ~−0.71  
+            - **Fertility Rate & Life Expectancy:** ~−0.74  
+            - **Mortality Rate (under 5) & Life Expectancy:** ~−0.88  
+            - **CO₂ Emissions & Renewable Energy:** ~−0.58
+
+            ⚖️ **Low or No Correlation (Near 0, White)**  
+            These indicate no linear relationship.
+            - **Forest area & Rule of Law:** ~0.13  
+            - **Fertility Rate & Regulatory Quality:** ~−0.01  
+            - **Heating Degree Days & CO₂:** ~0.08
+
+            **📊 Interpretation by Theme**
+            - **Environmental:** Forest area and renewables are negatively correlated with CO₂ emissions, consistent with climate policy effects.  
+            - **Social:** Education (e.g., school enrollment) and health (life expectancy) show strong positive associations.  
+            - **Governance:** Corruption control, regulatory quality, rule of law, and voice/accountability are highly interrelated and closely tied to overall ESG (FSS).
+
+            *Note: the numeric values above are indicative. Use the table below to display the exact correlation values from the selected year ({sel_year}).*
+            """,
+            unsafe_allow_html=False,
+        )
+
+        # Optional: show exact correlation values for the named pairs (falls back to NaN if not found)
+        try:
+            def get_corr(a, b):
+                return corr_df.loc[a, b] if (a in corr_df.index and b in corr_df.columns) else np.nan
+
+            sample_pairs = [
+                ("Control of Corruption", "Rule of Law"),
+                ("Government Effectiveness", "Regulatory Quality"),
+                ("Voice and Accountability", "Rule of Law"),
+                ("Life Expectancy", "School Enrollment"),
+                ("FSS", "Rule of Law"),
+                ("CO2 Emissions", "Forest Area"),
+                ("Fertility Rate", "Life Expectancy"),
+                ("Mortality Rate (under 5)", "Life Expectancy"),
+                ("CO2 Emissions", "Renewable Energy")
+            ]
+
+            # Build a small DataFrame of these values if the labels exist in the correlation matrix
+            rows = []
+            for a, b in sample_pairs:
+                val = get_corr(a, b)
+                if not pd.isna(val):
+                    rows.append({"Pair": f"{a} ↔ {b}", "Correlation": float(val)})
+                else:
+                    rows.append({"Pair": f"{a} ↔ {b}", "Correlation": "N/A (label not found)"})
+
+            sample_df = pd.DataFrame(rows)
+            st.subheader("Exact correlations (from data)")
+            st.dataframe(sample_df, use_container_width=True)
+        except Exception as e:
+            st.warning(f"Could not extract sample correlations: {e}")
+            
     else:
         st.info(f"No data available for correlation matrix in {sel_year}.")
 
