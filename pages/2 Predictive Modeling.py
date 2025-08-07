@@ -148,7 +148,7 @@ for col in feature_cols:
 X_input = pd.DataFrame([user_input])
 
 # Button to trigger forecast
-if st.button("🔍 Run ESG Forecast"):
+if st.button("🔍 Run Predictions"):
     # Train XGBoost model
     X = df[feature_cols]
     y = df[target_col]
