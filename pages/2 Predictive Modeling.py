@@ -162,7 +162,7 @@ if st.button("🔍 Run ESG Forecast"):
 
     # Forecast
     prediction = model.predict(X_input_imputed)[0]
-    st.success(f"📈 Forecasted ESG Performance (FSS): **{prediction * 100:.2f}%**")
+    st.success(f"📈 Predicted ESG Performance (FSS): **{prediction * 100:.2f}%**")
 
     # Feature importances (from adjusted input)
     importances = model.feature_importances_
@@ -172,7 +172,7 @@ if st.button("🔍 Run ESG Forecast"):
     }).sort_values("Importance", ascending=False)
 
     # Plot
-    st.subheader("🧮 Feature Contribution (Forecasted ESG Performance)")
+    st.subheader("🧮 Feature Contribution (Predicted ESG Performance)")
     fig = px.bar(importance_df.head(15), x="Importance", y="Indicator", orientation="h",
                  color="Importance", color_continuous_scale="Blues_r",
                  title="Top ESG Indicators Contributing to Forecast (XGBoost Feature Importance)")
